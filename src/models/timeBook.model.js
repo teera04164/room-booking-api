@@ -25,5 +25,5 @@ const schema = new Schema(
 //     },
 // });
 
-const timeBook = mongoose.model('time_booking', schema, 'time_booking')
-module.exports = { timeBook }
+const TimeBook = mongoose.model('time_booking', schema, 'time_booking')
+module.exports = { TimeBook }

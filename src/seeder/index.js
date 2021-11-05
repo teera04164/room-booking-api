@@ -8,7 +8,8 @@ const data = [
     ...require('./building.seeder'),
     ...require('./roomType.seeder'),
     ...require('./room.seeder'),
-    ...require('./booking.seeder')
+    ...require('./booking.seeder'),
+    ...require('./user.seeder')
 ]
 
 seeder.connect(
@@ -25,10 +26,11 @@ seeder.connect(
             '../models/roomType.model.js',
             '../models/room.model.js',
             '../models/booking.model.js',
+            '../models/user.model.js',
         ])
 
         // Clear specified collections
-        seeder.clearModels(['time_booking', 'building', 'room_type', 'room', 'booking'], () => {
+        seeder.clearModels(['time_booking', 'building', 'room_type', 'room', 'booking', 'user'], () => {
             // Callback to populate DB once collections have been cleared
             seeder.populateModels(data, () => {
                 seeder.disconnect()

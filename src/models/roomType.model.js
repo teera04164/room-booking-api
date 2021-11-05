@@ -24,5 +24,5 @@ schema.set("toJSON", {
     },
 });
 
-const roomType = mongoose.model('room_type', schema, 'room_type')
-module.exports = { roomType }
+const RoomType = mongoose.model('room_type', schema, 'room_type')
+module.exports = { RoomType }

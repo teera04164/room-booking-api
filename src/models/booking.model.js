@@ -7,6 +7,7 @@ const schema = new Schema(
         room_type_id: { type: Schema.Types.ObjectId, ref: "room_type" },
         room_id: { type: Schema.Types.ObjectId, ref: "room" },
         time_booking_id: { type: Schema.Types.ObjectId, ref: "time_booking" },
+        user_id: { type: Schema.Types.ObjectId, ref: "user" },
     },
     { timestamps: true }
 );
@@ -27,5 +28,5 @@ const schema = new Schema(
 // });
 
 
-const booking = mongoose.model("booking", schema, "booking");
-module.exports = { booking };
+const Booking = mongoose.model("booking", schema, "booking");
+module.exports = { Booking };
