@@ -5,6 +5,7 @@ const { RoomType } = require('../src/models/roomType.model');
 const { Room } = require('../src/models/room.model');
 const { Booking } = require('../src/models/booking.model');
 const { User } = require('../src/models/user.model');
+const dayjs = require('dayjs')
 const bcrypt = require("bcryptjs");
 
 const router = express.Router();
@@ -19,11 +20,11 @@ router.get('/building', async (req, res) => {
     res.json(result)
 })
 
-const getAllRoomWithBookingByRoomList = async (listRoom) => {
+const getAllRoomWithBookingByRoomList = async (listRoom, selected_date) => {
     const result = await Promise.all(
         listRoom.map(async eachRoom => {
             const { _id: room_id } = eachRoom
-            const resultBooking = await getBookingByRoomId(room_id)
+            const resultBooking = await getBookingByRoomId(room_id, selected_date)
             return {
                 ...eachRoom,
                 booking: resultBooking
@@ -33,17 +34,19 @@ const getAllRoomWithBookingByRoomList = async (listRoom) => {
     return result
 }
 
-const getBookingByRoomId = async (room_id) => {
-    return await Booking.find({ room_id }).select('-__v').lean()
+const getBookingByRoomId = async (room_id, selected_date) => {
+    let day = dayjs(selected_date).format('DD-MM-YYYY')
+    let result = await Booking.find({ room_id, date_booking: day }).select('-__v').lean()
+    return result
 }
 
 router.get('/booking', async (req, res) => {
-    const { building_id } = req.query
+    const { building_id, selected_date } = req.query
     const allRoomType = await RoomType.find({ building_id }).sort({ room_type_name: -1 }).select('-createdAt -updatedAt -__v').lean()
     const newResult = await Promise.all(allRoomType.map(async (eactRoomType) => {
         const { _id: room_type_id } = eactRoomType
         const allRoom = await Room.find({ room_type_id }).select('-createdAt -updatedAt -__v').lean()
-        const newAllRoom = await getAllRoomWithBookingByRoomList(allRoom)
+        const newAllRoom = await getAllRoomWithBookingByRoomList(allRoom, selected_date)
         return {
             ...eactRoomType,
             rooms: newAllRoom
@@ -53,8 +56,17 @@ router.get('/booking', async (req, res) => {
 })
 
 router.post('/booking', async (req, res) => {
-    const { building_id, room_type_id, room_id, time_booking_id, user_id } = req.body
-    const result = await Booking.create({ building_id, room_type_id, room_id, time_booking_id, user_id })
+    const { building_id, room_type_id, room_id, time_booking_id, user_id, selected_date } = req.body
+    let day = dayjs(selected_date).format('DD-MM-YYYY')
+    const result = await Booking.create({ building_id, room_type_id, room_id, time_booking_id, user_id, date_booking: day })
+    res.json({ result })
+})
+
+router.delete('/booking', async (req, res) => {
+    console.log("🚀 ~ file: route.js ~ line 62 ~ router.delete ~ req", req)
+    const { booking_id } = req.query
+    console.log("🚀 ~ file: route.js ~ line 63 ~ router.delete ~ booking_id", booking_id)
+    const result = await Booking.deleteOne({ _id: booking_id })
     res.json({ result })
 })
 

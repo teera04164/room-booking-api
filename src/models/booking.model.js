@@ -7,6 +7,7 @@ const schema = new Schema(
         room_type_id: { type: Schema.Types.ObjectId, ref: "room_type" },
         room_id: { type: Schema.Types.ObjectId, ref: "room" },
         time_booking_id: { type: Schema.Types.ObjectId, ref: "time_booking" },
+        date_booking: { type: String },
         user_id: { type: Schema.Types.ObjectId, ref: "user" },
     },
     { timestamps: true }

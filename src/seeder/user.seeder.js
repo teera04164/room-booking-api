@@ -18,8 +18,8 @@ module.exports = [
             },
             {
                 _id: "6183fc8aa27f18f469808569",
-                user_code: 'B585555',
-                name: 'สมศรี ดอกช่อ',
+                user_code: 'B581111',
+                name: 'ธีรพงษ์ สิทธิการ',
                 username: 'admin',
                 password: '123',//123
             },
