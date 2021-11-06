@@ -5,24 +5,23 @@ const cors = require('cors')
 
 const config = require('./config')
 const routes = require('./src/route')
-const { username, password } = config.mongoDB
+const { mongoDB } = config
 const app = express()
 
-const optionMongo = {
+mongoose.Promise = global.Promise
+
+mongoose.connect(mongoDB.connectString, {
     useNewUrlParser: true,
     useCreateIndex: true,
+    user: mongoDB.username,
+    pass: mongoDB.password,
     autoReconnect: true,
     keepAlive: 1,
     connectTimeoutMS: 30000,
-    reconnectTries: 30, // Retry up to 30 times
-    reconnectInterval: 500, // Reconnect every 500ms
-    poolSize: 10, // Maintain up to 10 socket connections
-}
-mongoose.Promise = global.Promise
-
-mongoose
-    .connect(`mongodb+srv://${username}:${password}@cluster0.in8lm.mongodb.net/booking-db?retryWrites=true&w=majority`, optionMongo)
-    .then(() => console.log('connection successful'))
+    reconnectTries: 30,// Retry up to 30 times
+    reconnectInterval: 500,// Reconnect every 500ms
+    poolSize: 10 // Maintain up to 10 socket connections
+}).then(() => console.log('connection successful'))
     .catch((err) => console.error(err))
 
 app.use(cors())
