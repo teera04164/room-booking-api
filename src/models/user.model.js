@@ -5,6 +5,7 @@ require('dotenv').config()
 
 const { Schema } = mongoose;
 const Token = require("./token.model");
+const { createAccessToken: genAccessToken } = require("../middlewares/auth.middleware");
 const schema = new Schema(
     {
         user_code: { type: String },
@@ -18,14 +19,9 @@ const schema = new Schema(
 schema.methods = {
     createAccessToken: async function () {
         try {
-            let { _id, username } = this;
-            let accessToken = jwt.sign(
-                { user: { _id, username } },
-                'ACCESS_TOKEN_SECRET',
-                {
-                    expiresIn: "10m",
-                }
-            );
+            let { _id } = this;
+            const payload = { user: { user_id: _id } }
+            let accessToken = genAccessToken(payload)
             return accessToken;
         } catch (error) {
             console.error(error);
@@ -36,8 +32,8 @@ schema.methods = {
         try {
             let { _id, username } = this;
             let refreshToken = jwt.sign(
-                { user: { _id, username } },
-                'REFRESH_TOKEN_SECRET',
+                { user: { user_id: _id } },
+                process.env.REFRESH_TOKEN_SECRET,
                 {
                     expiresIn: "1d",
                 }
