@@ -32,7 +32,11 @@ client.on('end', function () {
 });
 
 const set = (key, value) => {
-    client.set(key, JSON.stringify(value), 'EX', EXPIRE_TIME_DAY);
+    let result = value
+    if (typeof result === "object" && value !== null) {
+        result = JSON.stringify(value);
+    }
+    client.set(key, result, 'EX', EXPIRE_TIME_DAY);
     return 'done';
 }
 

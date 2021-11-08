@@ -6,6 +6,7 @@ require('dotenv').config()
 const { Schema } = mongoose;
 const Token = require("./token.model");
 const { createAccessToken: genAccessToken } = require("../middlewares/auth.middleware");
+const { redisDB } = require("../db/redisDB");
 const schema = new Schema(
     {
         user_code: { type: String },
@@ -35,10 +36,10 @@ schema.methods = {
                 { user: { user_id: _id } },
                 process.env.REFRESH_TOKEN_SECRET,
                 {
-                    expiresIn: "1d",
+                    expiresIn: process.env.REFRESH_TOKEN_EXPIRE,
                 }
             );
-
+            redisDB.set(refreshToken, '1')
             await new Token({ token: refreshToken }).save();
             return refreshToken;
         } catch (error) {

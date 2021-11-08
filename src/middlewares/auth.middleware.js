@@ -17,10 +17,19 @@ module.exports.verifyToken = (req, res, next) => {
     }
 }
 
-module.exports.decodeRefreshToken = (token) => {
+module.exports.verifyRefreshToken = (token) => {
     return jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
 }
 
+module.exports.decodeRefreshToken = (token) => {
+    return jwt.decode(token)
+}
+
+module.exports.verifyExpiration = (token) => {
+    const jwtDecode = jwt.decode(token)
+    return jwtDecode.exp < new Date().getTime();
+}
+
 module.exports.createAccessToken = (payload) => {
-    return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.JWT_EXPIRE });
+    return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRE });
 }

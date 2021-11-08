@@ -16,7 +16,7 @@ const cache = async (req, res, next) => {
         // const cowRule = getCOWRole(url)
         const cacheContent = await redisDB.get(key);
         if (cacheContent) {
-            console.log('middleware cache ', key, cacheContent);
+            // console.log('middleware cache ', key, cacheContent);
             res.json(cacheContent);
             return;
         } else {
