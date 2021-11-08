@@ -1,5 +1,4 @@
 const dayjs = require('dayjs')
-
 const { RoomType, Room, Booking } = require('../../src/models')
 const { redisDB } = require('../../src/db/redisDB')
 
@@ -35,7 +34,8 @@ const getBooking = async (req, res) => {
 }
 
 const saveBooking = async (req, res) => {
-    const { building_id, room_type_id, room_id, time_booking_id, user_id, selected_date } = req.body
+    const { building_id, room_type_id, room_id, time_booking_id, selected_date } = req.body
+    const { user: { user_id } } = req.user
     const day = dayjs(selected_date).format('DD-MM-YYYY')
 
     const result = await Booking.create({
@@ -53,7 +53,9 @@ const saveBooking = async (req, res) => {
 
 const deleteBooking = async (req, res) => {
     const { booking_id } = req.query
-    const booking = await Booking.findOne({ _id: booking_id })
+    const { user: { user_id } } = req.user
+
+    const booking = await Booking.findOne({ _id: booking_id, user_id })
     if (booking) {
         const { building_id, date_booking } = booking
         const keyCache = `${building_id}-${date_booking}`

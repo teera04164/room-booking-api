@@ -9,8 +9,7 @@ module.exports.verifyToken = (req, res, next) => {
             req.user = decoded
             next();
         } catch (error) {
-            // console.log(error);
-            res.status(401).json({ sucess: false, message: 'Something went wrong!!' })
+            res.status(401).json({ sucess: false, message: error?.message || 'Something went wrong!!' })
         }
     } else {
         res.status(401).json({ sucess: false, message: 'Not Authorized' })
@@ -27,7 +26,7 @@ module.exports.decodeRefreshToken = (token) => {
 
 module.exports.verifyExpiration = (token) => {
     const jwtDecode = jwt.decode(token)
-    return jwtDecode.exp < new Date().getTime();
+    return jwtDecode.exp * 1000 < new Date().getTime();
 }
 
 module.exports.createAccessToken = (payload) => {

@@ -39,9 +39,10 @@ schema.methods = {
                     expiresIn: process.env.REFRESH_TOKEN_EXPIRE,
                 }
             );
-            redisDB.set(refreshToken, '1')
-            await new Token({ token: refreshToken }).save();
-            return refreshToken;
+            let result = await new Token({ token: refreshToken }).save();
+            const refreshId = result._id.toString()
+            redisDB.set(refreshId, refreshToken)
+            return refreshId
         } catch (error) {
             console.error(error);
             return;

@@ -46,17 +46,17 @@ const register = async (req, res) => {
     }
 }
 const refresh = async (req, res) => {
-    const { refreshToken } = req.body
+    const { refreshToken: refreshTokenId } = req.body
     try {
-        if (!refreshToken) {
+        if (!refreshTokenId) {
             return res.status(403).json({ message: 'Refresh Token is required!' });
         }
 
-        const haveTokenInDB = checkTokenDB(refreshToken)
-        if (haveTokenInDB) {
+        const refreshToken = await checkTokenDB(refreshTokenId)
+        if (refreshToken) {
             if (verifyExpiration(refreshToken)) {
-                res.status(403).json({ message: 'refresh token was expired. Please make a new signin request' })
-                const result = await deleteTokenFromDB(refreshToken)
+                res.status(403).json({ message: 'refresh token was expired' })
+                const result = await deleteTokenFromDB(refreshTokenId)
                 return
             }
             const { user } = decodeRefreshToken(refreshToken)
@@ -76,16 +76,16 @@ const checkTokenDB = async (refreshToken) => {
     if (findInCache) {
         return findInCache
     } else {
-        const findToken = await tokenModel.find({ token: refreshToken }).lean()
+        const findToken = await tokenModel.findById(refreshToken).lean()
         if (findToken) {
-            return findToken
+            return findToken.token
         }
     }
     return null
 }
 
 const deleteTokenFromDB = async (refreshToken) => {
-    const result = await tokenModel.deleteOne({ token: refreshToken })
+    const result = await tokenModel.deleteOne({ _id: refreshToken })
     const findInCache = await redisDB.del(refreshToken)
     return {
         db: Boolean(result),
