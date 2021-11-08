@@ -1,5 +1,8 @@
 const redis = require('redis');
 
+const TIME_ONE_DAY = 86400
+const EXPIRE_TIME_DAY = 5 * TIME_ONE_DAY
+
 const client = redis.createClient({
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT,
@@ -29,7 +32,7 @@ client.on('end', function () {
 });
 
 const set = (key, value) => {
-    client.set(key, JSON.stringify(value), 'EX', 60);
+    client.set(key, JSON.stringify(value), 'EX', EXPIRE_TIME_DAY);
     return 'done';
 }
 
