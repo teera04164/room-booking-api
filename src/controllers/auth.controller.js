@@ -60,7 +60,7 @@ const refresh = async (req, res) => {
                 return
             }
             const { user } = decodeRefreshToken(refreshToken)
-            const accessToken = createAccessToken(user)
+            const accessToken = createAccessToken({ user })
             return res.status(200).json({ accessToken })
         } else {
             return res.status(403).json({ message: 'not found refresh token' })
