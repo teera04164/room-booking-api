@@ -1,8 +1,13 @@
 const { TimeBook, Building, } = require('../../src/models')
 const { redisDB } = require('../db/redisDB')
-
+const app = require('../../server')
+let count = 0
 const getAllKey = async (req, res) => {
+    const { building } = req.query
     const result = await redisDB.getAllKey()
+    const io = app.getSocketIo()
+    ++count
+    io.emit('hi', 'count => ' + count)
     res.json(result)
 }
 

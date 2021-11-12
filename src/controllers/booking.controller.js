@@ -1,53 +1,25 @@
 const dayjs = require('dayjs')
 const { RoomType, Room, Booking } = require('../../src/models')
 const { redisDB } = require('../../src/db/redisDB')
+const { bookingService } = require('../services')
 
 const getBooking = async (req, res) => {
     const { building_id, selected_date } = req.query
-    const day = dayjs(selected_date).format('DD-MM-YYYY')
-    const keyCache = `${building_id}-${day}`
-    const cached = await redisDB.get(keyCache)
-    if (cached) {
-        console.log('in use cache ', keyCache);
-        return res.json(cached)
-    } else {
-        console.log('in not use cache');
-    }
-
-    const allRoomType = await RoomType.find({ building_id })
-        .sort({ room_type_name: -1 })
-        .select('-createdAt -updatedAt -__v')
-        .lean()
-    const newResult = await Promise.all(
-        allRoomType.map(async (eactRoomType) => {
-            const { _id: room_type_id } = eactRoomType
-            const allRoom = await Room.find({ room_type_id }).select('-createdAt -updatedAt -__v').lean()
-            const newAllRoom = await getAllRoomWithBookingByRoomList(allRoom, selected_date)
-            return {
-                ...eactRoomType,
-                rooms: newAllRoom,
-            }
-        })
-    )
-    redisDB.set(keyCache, newResult)
-    res.json(newResult)
+    const booking = await bookingService.getBooking({ building_id, selected_date })
+    res.json(booking)
 }
 
 const saveBooking = async (req, res) => {
     const { building_id, room_type_id, room_id, time_booking_id, selected_date } = req.body
     const { user: { user_id } } = req.user
-    const day = dayjs(selected_date).format('DD-MM-YYYY')
-
-    const result = await Booking.create({
+    const result = await bookingService.saveBooking({
         building_id,
         room_type_id,
         room_id,
         time_booking_id,
         user_id,
-        date_booking: day,
+        selected_date,
     })
-
-    deleteCacheBooking(building_id, selected_date)
     res.json({ result })
 }
 
