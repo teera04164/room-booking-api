@@ -4,6 +4,7 @@ const router = express.Router()
 const { verifyToken } = require('./middlewares/auth.middleware')
 const { bookingController, authController, defaultController, redisController } = require('./controllers')
 const { cache } = require('./middlewares/cache.middleware')
+const { bookingService } = require('./services')
 
 
 router.get('/time-booking', verifyToken, cache, defaultController.getTimeBooking)
@@ -11,7 +12,7 @@ router.get('/building', verifyToken, cache, defaultController.getBuilding)
 
 router.get('/booking', verifyToken, bookingController.getBooking)
 router.post('/booking', verifyToken, bookingController.saveBooking)
-router.delete('/booking', verifyToken, bookingController.deleteBooking)
+router.delete('/booking', verifyToken, bookingService.deleteBooking)
 
 router.post('/auth/register', authController.register)
 router.post('/auth/login', authController.login)
