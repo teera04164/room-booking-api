@@ -1,14 +1,12 @@
-const dayjs = require('dayjs')
 const { RoomType, Room, Booking } = require('../../src/models')
 const { redisDB } = require('../../src/db/redisDB')
 const broadcastService = require('./broadcast.service')
 
 const getBooking = async ({ building_id, selected_date }) => {
-    const day = dayjs(selected_date).format('DD-MM-YYYY')
-    const keyCache = `${building_id}-${day}`
+    const keyCache = `${building_id}-${selected_date}`
     const cached = await redisDB.get(keyCache)
     if (cached) {
-        console.log('in use cache ', keyCache, cached)
+        // console.log('in use cache ', keyCache, cached)
         return cached
     }
     console.log('in not use cache')
@@ -33,14 +31,13 @@ const getBooking = async ({ building_id, selected_date }) => {
 }
 
 const saveBooking = async ({ building_id, room_type_id, room_id, time_booking_id, user_id, selected_date }) => {
-    const day = dayjs(selected_date).format('DD-MM-YYYY')
     const result = await Booking.create({
         building_id,
         room_type_id,
         room_id,
         time_booking_id,
         user_id,
-        date_booking: day,
+        date_booking: selected_date,
     })
 
     deleteCacheBooking(building_id, selected_date)
@@ -50,15 +47,15 @@ const saveBooking = async ({ building_id, room_type_id, room_id, time_booking_id
 
 const deleteBooking = async (req, res) => {
     const { booking_id } = req.query
-    const {
-        user: { user_id },
-    } = req.user
+    const { user: { user_id }, } = req.user
 
     const booking = await Booking.findOne({ _id: booking_id, user_id })
     if (booking) {
         const { building_id, date_booking } = booking
+        console.log("🚀 ~ file: booking.service.js ~ line 58 ~ deleteBooking ~ date_booking", date_booking)
         const keyCache = `${building_id}-${date_booking}`
         redisDB.del(keyCache)
+        broadcastBooking(building_id, date_booking)
         const result = await Booking.deleteOne({ _id: booking_id })
         res.json({ result })
     } else {
@@ -81,21 +78,18 @@ const getAllRoomWithBookingByRoomList = async (listRoom, selected_date) => {
 }
 
 const getBookingByRoomId = async (room_id, selected_date) => {
-    const day = dayjs(selected_date).format('DD-MM-YYYY')
-    const result = await Booking.find({ room_id, date_booking: day }).select('-__v').lean()
+    const result = await Booking.find({ room_id, date_booking: selected_date }).select('-__v').lean()
     return result
 }
 
 const deleteCacheBooking = (building_id, selected_date) => {
-    const day = dayjs(selected_date).format('DD-MM-YYYY')
-    const keyCache = `${building_id}-${day}`
+    const keyCache = `${building_id}-${selected_date}`
     redisDB.del(keyCache)
 }
 
 const broadcastBooking = async (building_id, selected_date) => {
-    const day = dayjs(selected_date).format('DD-MM-YYYY')
     let result = await getBooking({ building_id, selected_date })
-    broadcastService.broadcast(`${building_id}-${day}`, result)
+    broadcastService.broadcast(`${building_id}-${selected_date}`, result)
 }
 
 module.exports = {
