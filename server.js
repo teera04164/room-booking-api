@@ -17,31 +17,20 @@ const io = new Server(server, { cors: {} })
 io.on('connection', async (socket) => {
     console.log(`User Connected: ${socket.id}`)
 
-    // let result = await redisDB.get('6183fc7d7e115ccbf5f09328-08-11-2021')
-    // socket.emit("booking", result);
-
     socket.on('join_room', async ({ building_id, selected_date }) => {
-        const keyCache = `${building_id}-${selected_date}`
+        const roomName = `${building_id}-${selected_date}`
         if (building_id && selected_date) {
-            socket.join(keyCache)
-            console.log(`User with ID: ${socket.id} joined room: ${keyCache}`)
+            socket.join(roomName)
             const result = await bookingService.getBooking({ building_id, selected_date })
-            io.to(keyCache).emit('update-date', result)
+            io.to(roomName).emit('update-date', result)
+            console.log(`User with ID: ${socket.id} joined room: ${roomName}`)
         }
     })
 
     socket.on('leve_room', ({ building_id, selected_date }) => {
-        const keyCache = `${building_id}-${selected_date}`
-        socket.leave(keyCache)
-        console.log(`User with ID: ${socket.id} leve room: ${keyCache}`)
-    })
-
-    socket.on('get-booking', async (data) => {
-        console.log('in get booking', data);
-        const { building_id, selected_date } = data
-        const keyCache = `${building_id}-${selected_date}`
-        const result = await bookingService.getBooking({ building_id, selected_date })
-        io.to(keyCache).emit('update-date', result)
+        const roomName = `${building_id}-${selected_date}`
+        socket.leave(roomName)
+        console.log(`User with ID: ${socket.id} leve room: ${roomName}`)
     })
 
     socket.on('disconnect', () => {

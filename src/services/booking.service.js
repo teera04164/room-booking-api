@@ -45,22 +45,17 @@ const saveBooking = async ({ building_id, room_type_id, room_id, time_booking_id
     return result
 }
 
-const deleteBooking = async (req, res) => {
-    const { booking_id } = req.query
-    const { user: { user_id }, } = req.user
-
+const deleteBooking = async ({ booking_id, user_id }) => {
     const booking = await Booking.findOne({ _id: booking_id, user_id })
     if (booking) {
         const { building_id, date_booking } = booking
-        console.log("🚀 ~ file: booking.service.js ~ line 58 ~ deleteBooking ~ date_booking", date_booking)
         const keyCache = `${building_id}-${date_booking}`
         redisDB.del(keyCache)
         broadcastBooking(building_id, date_booking)
         const result = await Booking.deleteOne({ _id: booking_id })
-        res.json({ result })
-    } else {
-        res.status(400).json({ message: 'not found booking' })
+        return result
     }
+    return null
 }
 
 const getAllRoomWithBookingByRoomList = async (listRoom, selected_date) => {
